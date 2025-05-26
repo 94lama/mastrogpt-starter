@@ -5,8 +5,8 @@ MODEL="llama3.1:8b"
 
 def url(args):
   #TODO:E2.1
-  host = ...
-  auth = ...
+  host = args.get("OLLAMA_HOST", os.getenv("OLLAMA_HOST"))
+  auth = args.get("AUTH", os.getenv("AUTH"))
   #END TODO
   base = f"https://{auth}@{host}"
   return f"{base}/api/generate"
@@ -23,8 +23,9 @@ def stream(args, lines):
         #print(line, end='')     
         #TODO:E2.2 fix this streaming implementation
         # line is a json string and you have to extract only the "response" field
-        msg = {"output": line.decode("utf-8")}
-        out += str(line)
+        dec = json.loads(line.decode("utf-8")).get("response", "")
+        msg = {"output": dec}
+        out += str(dec)
         #END TODO
         s.sendall(json.dumps(msg).encode("utf-8"))
     except Exception as e:
@@ -41,6 +42,8 @@ def stateless(args):
     #TODO:E2.3 
     # add if to switch to llama3.1:8b or deepseek-r1:32b
     # on input 'llmama' or 'deepseek' and change the inp to "who are you"
+    if inp == "llama": inp = "who are you"
+    if inp == "deepseek": inp = "who are you"
     #END TODO
     msg = { "model": MODEL, "prompt": inp, "stream": True }
     lines = req.post(llm, json=msg, stream=True).iter_lines()
