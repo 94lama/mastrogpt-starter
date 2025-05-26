@@ -22,4 +22,9 @@ def test_stream():
     stream = streamock.stop(mock).decode("utf-8")
     assert out.find("{") == -1
     assert stream.find("Rom") != -1
-     
+
+def test_switch_model():
+    # init mock
+    args = streamock.args()
+    llm = stateless.url(args) 
+    mock = streamock.start(args)

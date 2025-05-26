@@ -5,7 +5,7 @@ MODEL="llama3.1:8b"
 
 def url(args):
   #TODO:E2.1
-  host = args.get("OLLAMA_HOST", os.getenv("OLLAMA_HOST"))
+  host = args.get("HOST", os.getenv("OLLAMA_HOST"))
   auth = args.get("AUTH", os.getenv("AUTH"))
   #END TODO
   base = f"https://{auth}@{host}"
@@ -42,8 +42,14 @@ def stateless(args):
     #TODO:E2.3 
     # add if to switch to llama3.1:8b or deepseek-r1:32b
     # on input 'llmama' or 'deepseek' and change the inp to "who are you"
-    if inp == "llama": inp = "who are you"
-    if inp == "deepseek": inp = "who are you"
+    if inp == "llama" or inp == "ddepseek":
+      if inp == "llama": 
+        MODEL = "llama3.1:8b"
+
+      if inp == "deepseek": 
+        MODEL="deepseek-r1:32b"
+
+      inp = "who are you"
     #END TODO
     msg = { "model": MODEL, "prompt": inp, "stream": True }
     lines = req.post(llm, json=msg, stream=True).iter_lines()
