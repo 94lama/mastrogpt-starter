@@ -1,5 +1,6 @@
 import sys
 sys.path.append("packages/form/puzzle")
+import re
 import puzzle
 
 def test_chess():
@@ -19,3 +20,9 @@ Bye!
 """ 
     assert puzzle.extract_fen(out) == fen  
     assert not puzzle.extract_fen("no fen\nhere\nsorry")
+
+def test_chess_form_filter():
+    filter = {"rook": "true", "queen": "", "knight": "", "bishop": ""}
+
+    res = puzzle.puzzle({"input": {"form": filter}})
+    assert res["chess"]

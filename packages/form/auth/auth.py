@@ -7,7 +7,7 @@ def unauthorized(args):
   return check.decode("utf-8") != secret
   
 def auth(args):
-  print("Token:", args.get("token", "<none>"))
-  #if unauthorized(args):
-  #  return { "output": "you are not authenticated" }
+  #print("Token:", args.get("token", "<none>"))
+  if unauthorized(args):
+    return { "output": "you are not authenticated" }
   return { "output": "you are authenticated" }
