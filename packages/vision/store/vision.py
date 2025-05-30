@@ -19,7 +19,7 @@ class Vision:
   def decode(self, img):
     msg = {
       "model": MODEL,
-      "messages": [ {
+      "messages": [{
         "role": "user",
         "content": "what is in this image?",
         "images": [img]
