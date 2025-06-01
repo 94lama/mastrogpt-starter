@@ -40,6 +40,7 @@ class VectorDB:
       schema = self.client.create_schema()
       schema.add_field(field_name="id", datatype=DataType.INT64, is_primary=True, auto_id=True)
       schema.add_field(field_name="text", datatype=DataType.VARCHAR, max_length=DIMENSION)
+      schema.add_field(field_name="url", datatype=DataType.VARCHAR, max_length=DIMENSION)
       schema.add_field(field_name="embeddings", datatype=DataType.FLOAT_VECTOR, dim=DIMENSION)
       
       index_params = self.client.prepare_index_params()
@@ -65,7 +66,7 @@ class VectorDB:
       collection_name=self.collection,
       search_params={"metric_type": "IP"},
       anns_field="embeddings", data=[vec],
-      output_fields=["text"],
+      output_fields=["text", "url"],
       limit=limit
     )
     res = []
@@ -73,7 +74,8 @@ class VectorDB:
       for item in cur[0]:
         dist = item.get('distance', 0)
         text = item.get("entity", {}).get("text", "")
-        res.append((dist, text))
+        url = item.get("entity", {}).get("url", "")
+        res.append((dist, text, url))
     return res
 
   def remove_by_substring(self, inp):

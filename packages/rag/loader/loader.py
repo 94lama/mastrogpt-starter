@@ -1,4 +1,4 @@
-import vdb
+import vdb, vision, base64
 
 USAGE = f"""Welcome to the Vector DB Loader.
 Write text to insert in the DB. 
@@ -10,9 +10,9 @@ Use `!![<collection>]` to remove `<collection>` (default current) and switch to 
 """
 
 def loader(args):
-  #print(args)
+  print(args)
   # get state: <collection>[:<limit>]
-  collection = "default"
+  collection = "default" #Create a new collection to use the image parser
   limit = 30
   sp = args.get("state", "").split(":")
   if len(sp) > 0 and len(sp[0]) > 0:
@@ -64,14 +64,77 @@ def loader(args):
     out = f"Deleted {count} records."    
   elif inp != '':
     out = "Inserted "
-    lines = [inp]
+    img = get_image(inp)
+
+    if not inp: return {"output": "The input is not valid", "state": f"{collection}:{limit}"}
+    """ lines = [inp]
     if args.get("options","") == "splitlines":
       lines = inp.split("\n")
     for line in lines:
       if line == '': continue
       res = db.insert(line)
       out += "\n".join([str(x) for x in res.get("ids", [])])
-      out += "\n"
+      out += "\n" """
+    
+    #key = save_image(inp)
+    vis = vision.Vision(args)
+    out = vis.decode(base64.b64encode(img.content).decode())
+    db.insert(out, inp)
 
   return {"output": out, "state": f"{collection}:{limit}"}
   
+
+def verify_secured_url(url):
+  return url.startswith("https://")
+
+def get_image(url):
+  if verify_secured_url(url):
+    import requests
+    res = requests.get(url)
+    if res.status_code > 299:
+      print(f"Error {res.status_code} while trying to open the URL")
+      return False
+    else:
+      print("The URL parsed is valid, opening the image...")
+      return res
+
+def save_image(res):
+  print("Saving the image parsed...")
+  import bucket, datetime, os
+  buc = bucket.Bucket({})
+  path = "img/"
+  time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+  key=f"{path}{time}"
+  res = buc.write(key, res.text)
+  print("res: ", res, os.getenv("S3_HOST"))
+  return key if res != "OK" else False
+
+def tokenize(text):
+    import re
+    tokens = text.split()
+    
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        
+        if re.match(r'\d{1,2}[/-]\d{1,2}[/-]\d{4}', token):
+            pass
+        elif re.match(r"\w+'s", token):
+            token = re.sub(r"(\w+)'s", r"\1 's", token)
+        elif re.match(r"\w+'\w+", token):
+            token = token.replace("'", "")
+        elif re.match(r"\w+-\w+", token):
+            pass
+        elif re.match(r"\d+(,\d+)*", token):
+            pass
+        else:
+            token = re.sub(r"([^\w\s]+)", r" \1 ", token)
+        
+        token = re.sub(r"(\w+)\.", r"\1", token)
+        token = re.sub(r"(\w+),", r"\1", token)
+        token = re.sub(r"U\.S\.A\.", r"U.S.A.", token)
+        
+        tokens[i] = token
+        i += 1
+    
+    return tokens

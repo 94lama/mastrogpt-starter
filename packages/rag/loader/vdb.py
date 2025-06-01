@@ -32,6 +32,7 @@ class VectorDB:
       schema = self.client.create_schema()
       schema.add_field(field_name="id", datatype=DataType.INT64, is_primary=True, auto_id=True)
       schema.add_field(field_name="text", datatype=DataType.VARCHAR, max_length=DIMENSION_TEXT)
+      schema.add_field(field_name="url", datatype=DataType.VARCHAR, max_length=DIMENSION_TEXT)
       schema.add_field(field_name="embeddings", datatype=DataType.FLOAT_VECTOR, dim=DIMENSION_EMBEDDING)
       
       index_params = self.client.prepare_index_params()
@@ -48,9 +49,9 @@ class VectorDB:
     res = req.post(self.url, json=msg).json()
     return res.get('embedding', [])
 
-  def insert(self, text):
+  def insert(self, text, url):
     vec = self.embed(text)
-    return self.client.insert(self.collection, {"text":text, "embeddings": vec})
+    return self.client.insert(self.collection, {"text":text, "url": url, "embeddings": vec})
   
   def count(self):
     MAX="1000"
@@ -74,6 +75,7 @@ class VectorDB:
       for item in cur[0]:
         dist = item.get('distance', 0)
         text = item.get("entity", {}).get("text", "")
+        url = item.get("entity", {}).get("url", "")
         res.append((dist, text))
     return res
 

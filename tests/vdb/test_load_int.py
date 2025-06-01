@@ -10,7 +10,7 @@ def test_load_int():
         {"input": "http://google.com", "response": "^The URL you requested is not secure!$"}, # Block HTTP requests
         {"input": "!https://google.com", "response": "^Deleted [\d]+ records\.$"}, # Deletes records
     ]
-    
+
     for inp in inputs:
         args = {"input": inp["input"]}
         res = req.post(url, json=args).json()

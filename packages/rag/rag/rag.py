@@ -22,7 +22,7 @@ def parse_query(content):
     res = {
         "model": MODELS["L"],
         "size": 30,
-        "collection": "default",
+        "collection": "img",
         "content": content
     }
 
@@ -112,6 +112,7 @@ def rag(args):
   out = USAGE
   if inp != "":
     opt = parse_query(inp)
+    print("opt: ", opt)
     if opt['content'] == '':
       db = vdb.VectorDB(args, opt["collection"], shorten=True)
       lines = [f"model={opt['model']}\n", f"size={opt['size']}\n",f"collection={db.collection}\n",f"({",".join(db.collections)})"]
@@ -119,15 +120,17 @@ def rag(args):
     else:
       db = vdb.VectorDB(args, opt["collection"], shorten=True)
       res = db.vector_search(opt['content'], limit=opt['size'])
+      print("res: ", res)
       prompt = ""
+      html = ""
       if len(res) > 0:
         prompt += "Consider the following text:\n"
-        for (w,txt) in res:
+        html = f'<img src="{res[0][2]}">'
+        for (w,txt,url) in res:
           prompt += f"{txt}\n"
         prompt += "Answer to the following prompt:\n"
       prompt += f"{opt['content']}"
         
-      print(prompt)
       out = llm(args, opt['model'], prompt)
 
-  return { "output": out, "streaming": True}
+  return { "output": out, "streaming": True, "html": html}
