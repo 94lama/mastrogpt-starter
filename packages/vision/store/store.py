@@ -31,16 +31,14 @@ def store(args):
       key = ls[0]
       out = f"Looking at {key}, I see:\n"
       data = buc.read(key)
-      img = base64.b64encode(data).decode("utf-8")
+      img = base64.b64encode(data).decode('utf-8')
       vis = vision.Vision(args)
-      out += vis.decode(img)
       url = buc.exturl(key, 3600)
+      out += vis.decode(img)
       res['html'] = f"<img src='{url}'>"
-      print(url)
+      print(img)
     else:
       out = f"Not found '*{inp[1:]}*'"
 
   res['output'] = out
   return res
-
-    

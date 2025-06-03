@@ -1,6 +1,6 @@
 import os, requests as req
 import vision2 as vision
-import sys
+import bucket
 
 USAGE = "Please upload a picture and I will tell you what I see"
 FORM = [
@@ -16,24 +16,22 @@ def form(args):
   res = {}
   out = USAGE
   inp = args.get("input", "")
-  buck = open_bucket(args)
 
   if type(inp) is dict and "form" in inp:
+    import base64
+    buck = bucket.Bucket(args)
     img = inp.get("form", {}).get("pic", "")
+    encoded_img = base64.b64decode(img)
     print(f"uploaded size {len(img)}")
+    print("img: ", encoded_img)
+    store_img(buck, encoded_img)
     vis = vision.Vision(args)
-    img = store_img(buck, img)
     out = vis.decode(img)
     res['html'] = f'<img src="data:image/png;base64,{img}">'
     
   res['form'] = FORM
   res['output'] = out
   return res
-
-def open_bucket(args):
-  print("Linking with your bucket...")
-  import bucket
-  return bucket.Bucket(args)
 
 def store_img(buck, img):
   import datetime
@@ -44,5 +42,4 @@ def store_img(buck, img):
   key=f"{path}{time}"
   res = buck.write(key, img)
   if res != "OK": return res
-
   return buck.exturl(key, 3600)

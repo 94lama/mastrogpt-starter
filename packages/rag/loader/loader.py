@@ -12,7 +12,7 @@ Use `!![<collection>]` to remove `<collection>` (default current) and switch to 
 def loader(args):
   print(args)
   # get state: <collection>[:<limit>]
-  collection = "default" #Create a new collection to use the image parser
+  collection = "img" #If not present, creating a new colection will authomatically set the correct parameters
   limit = 30
   sp = args.get("state", "").split(":")
   if len(sp) > 0 and len(sp[0]) > 0:
@@ -67,16 +67,7 @@ def loader(args):
     img = get_image(inp)
 
     if not inp: return {"output": "The input is not valid", "state": f"{collection}:{limit}"}
-    """ lines = [inp]
-    if args.get("options","") == "splitlines":
-      lines = inp.split("\n")
-    for line in lines:
-      if line == '': continue
-      res = db.insert(line)
-      out += "\n".join([str(x) for x in res.get("ids", [])])
-      out += "\n" """
-    
-    #key = save_image(inp)
+
     vis = vision.Vision(args)
     out = vis.decode(base64.b64encode(img.content).decode())
     db.insert(out, inp)
@@ -97,17 +88,6 @@ def get_image(url):
     else:
       print("The URL parsed is valid, opening the image...")
       return res
-
-def save_image(res):
-  print("Saving the image parsed...")
-  import bucket, datetime, os
-  buc = bucket.Bucket({})
-  path = "img/"
-  time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-  key=f"{path}{time}"
-  res = buc.write(key, res.text)
-  print("res: ", res, os.getenv("S3_HOST"))
-  return key if res != "OK" else False
 
 def tokenize(text):
     import re

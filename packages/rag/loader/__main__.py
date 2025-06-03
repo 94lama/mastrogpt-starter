@@ -6,9 +6,6 @@
 #--param MILVUS_PORT $MILVUS_PORT
 #--param MILVUS_DB_NAME $MILVUS_DB_NAME
 #--param MILVUS_TOKEN $MILVUS_TOKEN
-#--param S3_HOST $S3_HOST
-#--param S3_PORT $S3_PORT
-#--param S3_API_URL $S3_API_URL
 
 
 import loader
