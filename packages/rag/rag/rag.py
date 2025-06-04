@@ -109,28 +109,33 @@ def llm(args, model, prompt):
 
 def rag(args):
   inp = str(args.get('input', ""))
+  response = {}
+  response["streaming"] = True
   out = USAGE
   if inp != "":
     opt = parse_query(inp)
-    print("opt: ", opt)
     if opt['content'] == '':
       db = vdb.VectorDB(args, opt["collection"], shorten=True)
       lines = [f"model={opt['model']}\n", f"size={opt['size']}\n",f"collection={db.collection}\n",f"({",".join(db.collections)})"]
       out = streamlines(args, lines)
     else:
+      import bucket
+      buck = bucket.Bucket(args)
       db = vdb.VectorDB(args, opt["collection"], shorten=True)
       res = db.vector_search(opt['content'], limit=opt['size'])
-      print("res: ", res)
       prompt = ""
-      html = ""
       if len(res) > 0:
         prompt += "Consider the following text:\n"
-        html = f'<img src="{res[0][2]}">'
-        for (w,txt,url) in res:
+        # Future integration (response.html is not read)
+        #img = buck.exturl(res[0][2], 3600)
+        #if img: response["html"]=f"<img src='{img}'>"
+        for (w,txt,img) in res:
           prompt += f"{txt}\n"
         prompt += "Answer to the following prompt:\n"
       prompt += f"{opt['content']}"
-        
+      
       out = llm(args, opt['model'], prompt)
 
-  return { "output": out, "streaming": True, "html": html}
+  response["output"] = out
+  print("response: ", response)
+  return response

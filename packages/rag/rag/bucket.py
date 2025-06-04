@@ -1,0 +1,24 @@
+import os, boto3
+
+class Bucket:
+    def __init__(self, args):
+        host = args.get("S3_HOST", os.getenv("S3_HOST"))
+        port = args.get("S3_PORT", os.getenv("S3_PORT"))
+        url = f"http://{host}:{port}"
+        key = args.get("S3_ACCESS_KEY", os.getenv("S3_ACCESS_KEY"))
+        sec = args.get("S3_SECRET_KEY", os.getenv("S3_SECRET_KEY"))
+        self.client = boto3.client('s3', region_name='us-east-1', endpoint_url=url, aws_access_key_id=key, aws_secret_access_key=sec)
+        self.bucket = args.get("S3_BUCKET_DATA", os.getenv("S3_BUCKET_DATA"))
+        self.external_url = args.get("S3_API_URL")
+
+    def exturl(self, key, expiration):
+      url = self.client.generate_presigned_url(
+        'get_object',
+        Params={'Bucket': self.bucket, 'Key': key},
+        ExpiresIn=expiration)
+      if self.external_url:
+        from urllib.parse import urlparse, urlunparse
+        parsed_url = urlparse(url)
+        new_parsed = urlparse(self.external_url)
+        url = urlunparse((new_parsed.scheme, new_parsed.netloc, parsed_url.path, parsed_url.params, parsed_url.query, parsed_url.fragment))
+      return url
