@@ -11,6 +11,21 @@ class Bucket:
         self.bucket = args.get("S3_BUCKET_DATA", os.getenv("S3_BUCKET_DATA"))
         self.external_url = args.get("S3_API_URL")
 
+    def size(self, key):
+      try:
+        status = self.client.head_object(Bucket=self.bucket, Key=key)
+        size = status.get('ResponseMetadata', {}).get('HTTPHeaders', {}).get('content-length', -1)
+        return int(size)
+      except:
+        return -1
+
+    def write(self, key, body):
+        try:
+          self.client.put_object(Bucket=self.bucket, Key=key, Body=body)
+          return "OK" if self.size(key) != -1 else "Error"
+        except Exception as e:
+          return str(e)
+     
     def exturl(self, key, expiration):
       url = self.client.generate_presigned_url(
         'get_object',

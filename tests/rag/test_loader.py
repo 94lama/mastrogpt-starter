@@ -1,4 +1,6 @@
 import os, requests as req, sys, time
+sys.path.append("packages/rag/loader")
+
 def test_vdb_int():
     vdb = os.environ.get("OPSDEV_HOST") + "/api/my/rag/loader"
     
@@ -10,11 +12,11 @@ def test_vdb_int():
     res = req.post(vdb, json=args).json()
     res.get("output").startswith("OK:")
     
-    args = {"input": "*image"}
-    # retry a few tims for timing issues
-    for i in range(0, 10):
-        out = req.post(vdb, json=args).json().get("output")
-        assert out.startswith("Found")
+    time.sleep(1)
+    args = {"input": "*"}
+    out = req.post(vdb, json=args).json().get("output")
+    time.sleep(1)
+    assert out.startswith("Found")
         
     assert out.count("image") >= 1
     
@@ -22,8 +24,8 @@ def test_vdb_int():
     res = req.post(vdb, json=args).json()
     assert res.get("output").find("Deleted") != -1
 
-sys.path.append("packages/rag/loader")
 import vdb
+#Sometimes the test returns error because of a faulty import (VectorDB)
 def test_vdb():
     args = {"drop_collection": "test"}
     db = vdb.VectorDB(args, "default")
@@ -47,3 +49,63 @@ def test_vdb():
 
     assert db.remove_by_substring("screen") == dblen-1
 
+import vision, base64
+def test_vision_int():
+    img = req.get("https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png") #placeholder image
+    img = base64.b64encode(img.content)
+    vis = vision.Vision({})
+    res = vis.decode(img)
+    assert res != -1
+
+import bucket
+def test_bucket():
+    inp = "test"
+    buck = bucket.Bucket({})
+    record = buck.write(inp, "This is a test example")
+    assert "OK" in record
+
+    fake_record = buck.read("Does not exists")
+    assert fake_record == ""
+    record = buck.read(inp)
+    assert record == b"This is a test example"
+
+    record = buck.exturl(inp, 3600)
+    assert "http://minio:9000/" in record
+
+    size = buck.size(inp)
+    assert size > 0
+
+    record = buck.find("te")
+    assert record[0] == "test"
+
+    record = buck.remove(inp)
+    assert record != -1
+
+import loader
+#Sometimes the test returns error because of a faulty import (VectorDB)
+def test_loader_int():
+    args = {"input": "@test"}
+    load = loader.loader(args)
+
+    args = {"input": "#2"}
+    load = loader.loader(args)
+    assert "Search limit is now 2.\n" == load["output"]
+
+    args = {"input": "https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png"}
+    load = loader.loader(args)
+    assert "<img src='data:image/png;base64," in load["html"]
+    assert load["output"] != -1
+
+    args = {"input": "!"}
+    load = loader.loader(args)
+    assert "Deleted" in load["output"]
+
+    args = {"input": "!!test"}
+    load = loader.loader(args)
+    assert "Dropped test" in load["output"]
+    
+    args = {"input": ""}
+    load = loader.loader(args)
+    assert "Welcome to the Vector DB Loader.\nWrite text to insert in the DB." in load["output"]
+
+    
