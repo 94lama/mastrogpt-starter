@@ -8,7 +8,7 @@ def test_rag():
     assert rag.parse_query(query) == {'collection': 'img', 'content': query, 'model': 'llama3.1:8b', 'size': 30}
 
     for model in models:
-        assert rag.llm(args, model, query) != 0
+        assert rag.llm(args, model, query) != -1
 
 def test_vdb_int():
     vdb = os.environ.get("OPSDEV_HOST") + "/api/my/rag/rag"
