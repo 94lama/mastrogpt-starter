@@ -30,6 +30,7 @@ class VectorDB:
     ls = self.client.list_collections()
     if not collection in ls:
       schema = self.client.create_schema()
+      schema.enable_dynamic_field=True
       schema.add_field(field_name="id", datatype=DataType.INT64, is_primary=True, auto_id=True)
       schema.add_field(field_name="text", datatype=DataType.VARCHAR, max_length=DIMENSION_TEXT)
       schema.add_field(field_name="url", datatype=DataType.VARCHAR, max_length=DIMENSION_TEXT)

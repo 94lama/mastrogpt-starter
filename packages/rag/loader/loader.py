@@ -91,6 +91,7 @@ def loader(args):
     decoded_img = base64.b64encode(img.content)
     vis = vision.Vision(args)
     response["output"] = vis.decode(decoded_img)
+    print("response: ", response["output"], key)
     buck.write(key, decoded_img)
     db.insert(response["output"], key)
     if decoded_img:

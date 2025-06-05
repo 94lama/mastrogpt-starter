@@ -47,7 +47,6 @@ def parse_query(content):
     
     return res
 
-
 def streamlines(args, lines):
   sock = args.get("STREAM_HOST")
   port = int(args.get("STREAM_PORT") or "0")
@@ -92,7 +91,6 @@ def stream(args, lines):
       s.close()
   return out
 
-
 def llm(args, model, prompt):
   host = args.get("OLLAMA_HOST", os.getenv("OLLAMA_HOST"))
   auth = args.get("AUTH", os.getenv("AUTH"))
@@ -119,16 +117,17 @@ def rag(args):
       lines = [f"model={opt['model']}\n", f"size={opt['size']}\n",f"collection={db.collection}\n",f"({",".join(db.collections)})"]
       out = streamlines(args, lines)
     else:
-      import bucket
-      buck = bucket.Bucket(args)
       db = vdb.VectorDB(args, opt["collection"], shorten=True)
       res = db.vector_search(opt['content'], limit=opt['size'])
       prompt = ""
       if len(res) > 0:
+        """ Future integration (response.html is not read)
+        import bucket
+        buck = bucket.Bucket(args)
+        img = buck.exturl(res[0][2], 3600)
+        if img: response["html"]=f"<img src='{img}'>" """
+        
         prompt += "Consider the following text:\n"
-        # Future integration (response.html is not read)
-        #img = buck.exturl(res[0][2], 3600)
-        #if img: response["html"]=f"<img src='{img}'>"
         for (w,txt,img) in res:
           prompt += f"{txt}\n"
         prompt += "Answer to the following prompt:\n"
