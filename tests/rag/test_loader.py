@@ -82,6 +82,12 @@ def test_bucket():
     assert record != -1
 
 import loader
+def test_loader():
+    args = {}
+    assert loader.verify_secured_url("https://google.com") == True
+    assert loader.verify_secured_url("http://google.com") == False
+    assert loader.get_image("https://developers.elementor.com/docs/assets/img/elementor-placeholder-image.png") != -1
+
 #Sometimes the test returns error because of a faulty import (VectorDB)
 def test_loader_int():
     args = {"input": "@test"}

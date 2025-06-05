@@ -1,6 +1,15 @@
 import os, requests as req, sys, time
 sys.path.append("packages/rag/rag")
 
+def test_rag():
+    args={}
+    query = "Ciao"
+    models = ["phi4:14b", "llama3.1:8b", "mistral:latest"]
+    assert rag.parse_query(query) == {'collection': 'img', 'content': query, 'model': 'llama3.1:8b', 'size': 30}
+
+    for model in models:
+        assert rag.llm(args, model, query) != 0
+
 def test_vdb_int():
     vdb = os.environ.get("OPSDEV_HOST") + "/api/my/rag/rag"
     
