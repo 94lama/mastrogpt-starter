@@ -108,7 +108,7 @@ def llm(args, model, prompt):
 def rag(args):
   inp = str(args.get('input', ""))
   response = {}
-  response["streaming"] = True
+  response["streaming"] = False
   out = USAGE
   if inp != "":
     opt = parse_query(inp)
@@ -125,7 +125,7 @@ def rag(args):
         buck = bucket.Bucket(args)
         img = buck.exturl(res[0][2], 3600)
         print("analyze: ", img)
-        response["html"]=f"<img src='{img}'>"
+        if img: response["html"]=f"<img src='{img}'>"
         
         prompt += "Consider the following text:\n"
         for (w,txt,img) in res:
