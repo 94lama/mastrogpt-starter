@@ -121,11 +121,11 @@ def rag(args):
       res = db.vector_search(opt['content'], limit=opt['size'])
       prompt = ""
       if len(res) > 0:
-        """ Future integration (response.html is not read)
         import bucket
         buck = bucket.Bucket(args)
         img = buck.exturl(res[0][2], 3600)
-        if img: response["html"]=f"<img src='{img}'>" """
+        print("analyze: ", img)
+        response["html"]=f"<img src='{img}'>"
         
         prompt += "Consider the following text:\n"
         for (w,txt,img) in res:
@@ -135,6 +135,6 @@ def rag(args):
       
       out = llm(args, opt['model'], prompt)
 
+  print(response)
   response["output"] = out
-  print("response: ", response)
   return response

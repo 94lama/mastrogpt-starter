@@ -87,12 +87,13 @@ def loader(args):
     import bucket, datetime
     buck = bucket.Bucket(args)
     timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-    key = f"rag/{timestamp}"
+    key = f"rag/{timestamp}.jpg"
     decoded_img = base64.b64encode(img.content)
+    res = buck.write(key, img.content)
+    if(res != "OK"): print("analyze: ", res)
+
     vis = vision.Vision(args)
     response["output"] = vis.decode(decoded_img)
-    print("response: ", response["output"], key)
-    buck.write(key, decoded_img)
     db.insert(response["output"], key)
     if decoded_img:
        response["html"] = f"<img src='data:image/png;base64,{decoded_img.decode("utf-8")}'>"

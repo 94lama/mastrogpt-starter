@@ -37,3 +37,11 @@ class Bucket:
         new_parsed = urlparse(self.external_url)
         url = urlunparse((new_parsed.scheme, new_parsed.netloc, parsed_url.path, parsed_url.params, parsed_url.query, parsed_url.fragment))
       return url
+    
+    def read(self, key):
+      try:
+        res = self.client.get_object(Bucket=self.bucket, Key=key)
+        data = res["Body"].read()
+        return data
+      except:
+        return ""
